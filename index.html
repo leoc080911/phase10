@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 10 — Feuille de score</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<style>
+:root{
+  --felt-0:#0F2E24;
+  --felt-1:#163A2E;
+  --felt-2:#1F4D3B;
+  --cream:#F6F1E2;
+  --cream-dim:#E7E0CC;
+  --ink:#1C2620;
+  --gold:#D4A24E;
+  --gold-dim:#8C6B2E;
+  --red:#B23A2E;
+  --red-dim:#7A2820;
+  --line:rgba(246,241,226,0.14);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(212,162,78,0.10), transparent 40%),
+    radial-gradient(circle at 100% 0%, rgba(212,162,78,0.07), transparent 45%),
+    var(--felt-0);
+  color:var(--cream);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  padding:2.5rem 1.25rem 5rem;
+}
+.wrap{max-width:840px;margin:0 auto;}
+header{text-align:center;margin-bottom:2.2rem;}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin:0 0 .5rem;
+}
+h1{
+  font-family:'Fraunces',serif;
+  font-weight:700;
+  font-size:clamp(32px,7vw,52px);
+  margin:0;
+  letter-spacing:-.01em;
+}
+h1 span{color:var(--gold);}
+.sub{
+  font-size:14px;
+  color:var(--cream-dim);
+  margin:.6rem 0 0;
+}
+
+.card{
+  background:var(--felt-1);
+  border:0.5px solid var(--line);
+  border-radius:14px;
+  padding:1.4rem 1.5rem;
+  margin-bottom:1.5rem;
+}
+.card h2{
+  font-family:'Fraunces',serif;
+  font-size:19px;
+  font-weight:500;
+  margin:0 0 1rem;
+  color:var(--cream);
+  display:flex;align-items:center;gap:.5rem;
+}
+.card h2 .num{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  color:var(--gold);
+  border:1px solid var(--gold-dim);
+  border-radius:4px;
+  padding:1px 6px;
+}
+
+/* setup */
+#setupRow{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;}
+.pinput{
+  background:var(--felt-2);
+  border:0.5px solid var(--line);
+  color:var(--cream);
+  border-radius:8px;
+  padding:.55rem .8rem;
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  flex:1;
+  min-width:140px;
+}
+.pinput:focus{outline:none;border-color:var(--gold-dim);}
+button{
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;
+  font-weight:500;
+  border-radius:8px;
+  padding:.55rem 1rem;
+  cursor:pointer;
+  border:0.5px solid var(--line);
+  background:transparent;
+  color:var(--cream);
+  transition:background .12s ease, transform .08s ease;
+}
+button:hover{background:rgba(246,241,226,0.06);}
+button:active{transform:scale(0.98);}
+.btn-gold{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:var(--felt-0);
+  font-weight:600;
+}
+.btn-gold:hover{background:#e0b264;}
+.btn-red{color:#F0B4AC;border-color:var(--red-dim);}
+.btn-red:hover{background:rgba(178,58,46,0.16);}
+.playerchip{
+  display:flex;align-items:center;gap:.4rem;
+  background:var(--felt-2);
+  border:0.5px solid var(--line);
+  border-radius:20px;
+  padding:.35rem .5rem .35rem .9rem;
+  font-size:13.5px;
+}
+.playerchip button{
+  border:none;background:none;padding:0 4px;color:var(--cream-dim);font-size:15px;line-height:1;
+}
+.playerchip button:hover{color:var(--red);background:none;}
+
+/* phase ladder — signature element */
+.ladderRow{display:flex;align-items:center;gap:.9rem;padding:.6rem 0;border-top:0.5px solid var(--line);}
+.ladderRow:first-of-type{border-top:none;}
+.ladderName{
+  min-width:110px;
+  font-weight:600;
+  font-size:14px;
+  color:var(--cream);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ladder{display:flex;gap:4px;flex:1;flex-wrap:wrap;}
+.pcard{
+  width:22px;height:30px;
+  border-radius:4px;
+  border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  color:var(--cream-dim);
+  background:var(--felt-2);
+  flex-shrink:0;
+}
+.pcard.done{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:var(--felt-0);
+  font-weight:600;
+}
+.pcard.current{
+  border-color:var(--gold);
+  color:var(--gold);
+}
+.ladderScore{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:16px;
+  font-weight:600;
+  min-width:52px;
+  text-align:right;
+}
+.crown{color:var(--gold);margin-left:4px;}
+
+/* round entry */
+.roundGrid{display:flex;flex-direction:column;gap:.7rem;}
+.roundPlayer{
+  display:flex;align-items:center;gap:.7rem;
+  background:var(--felt-2);
+  border-radius:10px;
+  padding:.6rem .8rem;
+  flex-wrap:wrap;
+}
+.roundPlayer .rname{min-width:100px;font-size:13.5px;font-weight:500;}
+.checklabel{
+  display:flex;align-items:center;gap:.4rem;
+  font-size:12.5px;color:var(--cream-dim);
+  cursor:pointer;
+  user-select:none;
+}
+.checklabel input{accent-color:var(--gold);width:15px;height:15px;}
+.scoreInput{
+  width:70px;
+  background:var(--felt-1);
+  border:0.5px solid var(--line);
+  color:var(--cream);
+  border-radius:6px;
+  padding:.4rem .5rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  text-align:right;
+}
+.calcToggle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--gold);
+  cursor:pointer;
+  border:1px solid var(--gold-dim);
+  border-radius:5px;
+  padding:2px 7px;
+  background:none;
+}
+.calcBox{
+  flex-basis:100%;
+  display:none;
+  gap:6px;flex-wrap:wrap;
+  margin-top:.5rem;
+  padding-top:.5rem;
+  border-top:0.5px dashed var(--line);
+}
+.calcBox.open{display:flex;}
+.cbtn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+  padding:.3rem .55rem;
+  border-radius:6px;
+  border:0.5px solid var(--line);
+  background:var(--felt-1);
+  color:var(--cream-dim);
+}
+.cbtn.skip{border-color:var(--red-dim);color:#F0B4AC;}
+.cbtn.wild{border-color:var(--gold-dim);color:var(--gold);}
+.calcSum{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;color:var(--cream-dim);
+  margin-left:auto;align-self:center;
+}
+
+/* history table */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{
+  text-align:right;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:500;
+  font-size:11px;
+  letter-spacing:.05em;
+  color:var(--gold);
+  text-transform:uppercase;
+  padding:.4rem .5rem;
+  border-bottom:1px solid var(--line);
+}
+th:first-child,td:first-child{text-align:left;}
+td{
+  text-align:right;
+  padding:.45rem .5rem;
+  font-family:'IBM Plex Mono',monospace;
+  border-bottom:0.5px solid var(--line);
+  color:var(--cream-dim);
+}
+tr.totalrow td{
+  color:var(--cream);
+  font-weight:600;
+  border-top:1px solid var(--gold-dim);
+  border-bottom:none;
+}
+.roundDel{
+  border:none;background:none;color:var(--cream-dim);
+  font-size:13px;cursor:pointer;padding:0 4px;
+}
+.roundDel:hover{color:var(--red);}
+.empty{
+  text-align:center;
+  color:var(--cream-dim);
+  font-size:13.5px;
+  padding:1.2rem 0;
+}
+.winnerBanner{
+  background:var(--gold);
+  color:var(--felt-0);
+  border-radius:10px;
+  padding:.8rem 1rem;
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:15px;
+  text-align:center;
+  margin-bottom:1.5rem;
+}
+.rulesToggle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--gold);cursor:pointer;
+  border:none;background:none;text-decoration:underline;
+  padding:0;
+}
+.rulesList{display:none;margin-top:.8rem;font-size:12.5px;color:var(--cream-dim);line-height:1.6;}
+.rulesList.open{display:block;}
+.rulesList div{display:flex;justify-content:space-between;border-bottom:0.5px solid var(--line);padding:3px 0;}
+@media(max-width:520px){
+  .ladderName{min-width:80px;font-size:12.5px;}
+  .pcard{width:18px;height:26px;font-size:9px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Feuille de marque</p>
+    <h1>Phase <span>10</span></h1>
+    <p class="sub">Calcule les scores, suis les phases, désigne le vainqueur.</p>
+  </header>
+
+  <div id="winnerZone"></div>
+
+  <div class="card">
+    <h2><span class="num">1</span> Joueurs</h2>
+    <div id="setupRow"></div>
+    <div style="display:flex;gap:.6rem;">
+      <input class="pinput" id="newName" placeholder="Prénom du joueur" maxlength="16" style="flex:2;">
+      <button class="btn-gold" id="addPlayerBtn">Ajouter</button>
+    </div>
+  </div>
+
+  <div class="card" id="ladderCard" style="display:none;">
+    <h2><span class="num">2</span> Progression des phases</h2>
+    <div id="ladderZone"></div>
+    <button class="rulesToggle" id="rulesToggle">voir les 10 phases</button>
+    <div class="rulesList" id="rulesList"></div>
+  </div>
+
+  <div class="card" id="roundCard" style="display:none;">
+    <h2><span class="num">3</span> Nouvelle manche</h2>
+    <div class="roundGrid" id="roundGrid"></div>
+    <div style="margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end;">
+      <button class="btn-gold" id="validateRound">Valider la manche</button>
+    </div>
+  </div>
+
+  <div class="card" id="historyCard" style="display:none;">
+    <h2><span class="num">4</span> Historique</h2>
+    <div style="overflow-x:auto;">
+      <table id="historyTable"></table>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:1rem;">
+    <button class="btn-red" id="resetBtn">Réinitialiser la partie</button>
+  </div>
+</div>
+
+<script>
+const PHASES = [
+  "2 groupes de 3",
+  "1 groupe de 3 + 1 suite de 4",
+  "1 groupe de 4 + 1 suite de 4",
+  "1 suite de 7",
+  "1 suite de 8",
+  "1 suite de 9",
+  "2 groupes de 4",
+  "7 cartes d'une couleur",
+  "1 groupe de 5 + 1 groupe de 2",
+  "1 groupe de 5 + 1 groupe de 3"
+];
+
+let state = { players: [], rounds: [] };
+let calcState = {};
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem('phase10-state');
+    if(raw) state = JSON.parse(raw);
+  }catch(e){}
+  render();
+}
+function saveState(){
+  try{ localStorage.setItem('phase10-state', JSON.stringify(state)); }
+  catch(e){}
+}
+
+function addPlayer(){
+  const input = document.getElementById('newName');
+  const name = input.value.trim();
+  if(!name) return;
+  state.players.push({ id: uid(), name, phase: 1 });
+  input.value='';
+  saveState(); render();
+}
+function removePlayer(id){
+  state.players = state.players.filter(p=>p.id!==id);
+  state.rounds.forEach(r=>{ delete r.scores[id]; });
+  saveState(); render();
+}
+
+function renderSetup(){
+  const zone = document.getElementById('setupRow');
+  zone.innerHTML='';
+  state.players.forEach(p=>{
+    const chip = document.createElement('div');
+    chip.className='playerchip';
+    chip.innerHTML = `<span>${escapeHtml(p.name)}</span>`;
+    const del = document.createElement('button');
+    del.setAttribute('aria-label','Retirer '+p.name);
+    del.innerHTML = '&times;';
+    del.onclick = ()=>removePlayer(p.id);
+    chip.appendChild(del);
+    zone.appendChild(chip);
+  });
+}
+
+function totalScore(playerId){
+  return state.rounds.reduce((sum,r)=> sum + (r.scores[playerId]?.score||0), 0);
+}
+function currentPhase(playerId){
+  const p = state.players.find(x=>x.id===playerId);
+  return p ? p.phase : 1;
+}
+
+function renderLadder(){
+  const card = document.getElementById('ladderCard');
+  const zone = document.getElementById('ladderZone');
+  zone.innerHTML='';
+  if(state.players.length===0){ card.style.display='none'; return; }
+  card.style.display='block';
+
+  const ranked = [...state.players].sort((a,b)=>{
+    if(b.phase !== a.phase) return b.phase - a.phase;
+    return totalScore(a.id) - totalScore(b.id);
+  });
+
+  ranked.forEach(p=>{
+    const row = document.createElement('div');
+    row.className='ladderRow';
+    const won = p.phase > 10;
+    const name = document.createElement('div');
+    name.className='ladderName';
+    name.innerHTML = escapeHtml(p.name) + (won ? '<span class="crown"><i class="ti ti-crown"></i></span>' : '');
+    row.appendChild(name);
+
+    const ladder = document.createElement('div');
+    ladder.className='ladder';
+    for(let i=1;i<=10;i++){
+      const c = document.createElement('div');
+      c.className='pcard' + (i < p.phase || won ? ' done' : (i===p.phase ? ' current' : ''));
+      c.textContent = i;
+      c.title = PHASES[i-1];
+      ladder.appendChild(c);
+    }
+    row.appendChild(ladder);
+
+    const score = document.createElement('div');
+    score.className='ladderScore';
+    score.textContent = totalScore(p.id);
+    row.appendChild(score);
+
+    zone.appendChild(row);
+  });
+
+  const anyWinner = state.players.find(p=>p.phase>10);
+  const winnerZone = document.getElementById('winnerZone');
+  if(anyWinner){
+    winnerZone.innerHTML = `<div class="winnerBanner">${escapeHtml(anyWinner.name)} remporte la partie — phase 10 complétée, ${totalScore(anyWinner.id)} points</div>`;
+  } else {
+    winnerZone.innerHTML='';
+  }
+}
+
+function cardValue(kind){
+  if(kind==='skip') return 15;
+  if(kind==='wild') return 25;
+  return kind; // number 1-9 or 10 (covers 10/11/12)
+}
+
+function renderRoundEntry(){
+  const card = document.getElementById('roundCard');
+  const grid = document.getElementById('roundGrid');
+  grid.innerHTML='';
+  if(state.players.length===0){ card.style.display='none'; return; }
+  card.style.display='block';
+
+  state.players.forEach(p=>{
+    if(!calcState[p.id]) calcState[p.id] = { open:false, items:[] };
+    const row = document.createElement('div');
+    row.className='roundPlayer';
+
+    const name = document.createElement('div');
+    name.className='rname';
+    name.textContent = p.name;
+    row.appendChild(name);
+
+    const check = document.createElement('label');
+    check.className='checklabel';
+    check.innerHTML = `<input type="checkbox" id="done-${p.id}"><span>Phase ${p.phase>10?10:p.phase} validée</span>`;
+    row.appendChild(check);
+
+    const scoreWrap = document.createElement('div');
+    scoreWrap.style.display='flex';scoreWrap.style.alignItems='center';scoreWrap.style.gap='6px';
+    const scoreInput = document.createElement('input');
+    scoreInput.type='number'; scoreInput.min='0'; scoreInput.className='scoreInput';
+    scoreInput.id = 'score-'+p.id;
+    scoreInput.placeholder='0';
+    scoreWrap.appendChild(scoreInput);
+
+    const calcBtn = document.createElement('button');
+    calcBtn.type='button'; calcBtn.className='calcToggle'; calcBtn.textContent='calculer';
+    calcBtn.onclick = ()=>{ calcState[p.id].open = !calcState[p.id].open; renderRoundEntry(); };
+    scoreWrap.appendChild(calcBtn);
+    row.appendChild(scoreWrap);
+
+    const calcBox = document.createElement('div');
+    calcBox.className='calcBox' + (calcState[p.id].open ? ' open':'');
+    const cardDefs = [1,2,3,4,5,6,7,8,9,'10/11/12','skip','wild'];
+    cardDefs.forEach(def=>{
+      const btn = document.createElement('button');
+      btn.type='button';
+      btn.className='cbtn' + (def==='skip'?' skip':def==='wild'?' wild':'');
+      const val = def==='10/11/12' ? 10 : def==='skip' ? 'skip' : def==='wild' ? 'wild' : def;
+      btn.textContent = def==='skip' ? 'Skip +15' : def==='wild' ? 'Wild +25' : (def==='10/11/12' ? '10/11/12' : def+'');
+      btn.onclick = ()=>{
+        calcState[p.id].items.push(cardValue(val));
+        updateCalcSum(p.id);
+      };
+      calcBox.appendChild(btn);
+    });
+    const undoBtn = document.createElement('button');
+    undoBtn.type='button'; undoBtn.className='cbtn';
+    undoBtn.innerHTML='<i class="ti ti-backspace"></i>';
+    undoBtn.onclick = ()=>{ calcState[p.id].items.pop(); updateCalcSum(p.id); };
+    calcBox.appendChild(undoBtn);
+
+    const sum = document.createElement('span');
+    sum.className='calcSum';
+    sum.id = 'sum-'+p.id;
+    calcBox.appendChild(sum);
+
+    row.appendChild(calcBox);
+    grid.appendChild(row);
+    updateCalcSum(p.id);
+  });
+}
+
+function updateCalcSum(playerId){
+  const el = document.getElementById('sum-'+playerId);
+  if(!el) return;
+  const items = calcState[playerId].items;
+  const total = items.reduce((a,b)=>a+b,0);
+  el.textContent = items.length ? `= ${total} pts (${items.length} carte${items.length>1?'s':''})` : '';
+  const input = document.getElementById('score-'+playerId);
+  if(input && items.length) input.value = total;
+}
+
+function validateRound(){
+  if(state.players.length===0) return;
+  const scores = {};
+  state.players.forEach(p=>{
+    const scoreInput = document.getElementById('score-'+p.id);
+    const doneBox = document.getElementById('done-'+p.id);
+    const score = parseInt(scoreInput.value,10) || 0;
+    const done = doneBox.checked;
+    scores[p.id] = { score, phase: p.phase>10?10:p.phase, done };
+    if(done && p.phase<=10) p.phase += 1;
+  });
+  state.rounds.push({ id: uid(), scores });
+  calcState = {};
+  saveState(); render();
+}
+
+function deleteRound(roundId){
+  const round = state.rounds.find(r=>r.id===roundId);
+  if(round){
+    Object.keys(round.scores).forEach(pid=>{
+      if(round.scores[pid].done){
+        const p = state.players.find(x=>x.id===pid);
+        if(p && p.phase>1) p.phase -= 1;
+      }
+    });
+  }
+  state.rounds = state.rounds.filter(r=>r.id!==roundId);
+  saveState(); render();
+}
+
+function renderHistory(){
+  const card = document.getElementById('historyCard');
+  const table = document.getElementById('historyTable');
+  table.innerHTML='';
+  if(state.rounds.length===0 || state.players.length===0){ card.style.display='none'; return; }
+  card.style.display='block';
+
+  const thead = document.createElement('tr');
+  thead.innerHTML = '<th>Manche</th>' + state.players.map(p=>`<th>${escapeHtml(p.name)}</th>`).join('') + '<th></th>';
+  table.appendChild(thead);
+
+  state.rounds.forEach((r,idx)=>{
+    const tr = document.createElement('tr');
+    let cells = `<td>${idx+1}</td>`;
+    state.players.forEach(p=>{
+      const s = r.scores[p.id];
+      const val = s ? s.score : '—';
+      const mark = s && s.done ? ' <i class="ti ti-check" style="color:var(--gold)"></i>' : '';
+      cells += `<td>${val}${mark}</td>`;
+    });
+    cells += `<td><button class="roundDel" title="Supprimer" onclick="deleteRound('${r.id}')"><i class="ti ti-trash"></i></button></td>`;
+    tr.innerHTML = cells;
+    table.appendChild(tr);
+  });
+
+  const totalTr = document.createElement('tr');
+  totalTr.className='totalrow';
+  let totalCells = '<td>Total</td>';
+  state.players.forEach(p=> totalCells += `<td>${totalScore(p.id)}</td>`);
+  totalCells += '<td></td>';
+  totalTr.innerHTML = totalCells;
+  table.appendChild(totalTr);
+}
+
+function renderRules(){
+  const list = document.getElementById('rulesList');
+  list.innerHTML = PHASES.map((p,i)=>`<div><span>Phase ${i+1}</span><span>${p}</span></div>`).join('');
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function render(){
+  renderSetup();
+  renderLadder();
+  renderRoundEntry();
+  renderHistory();
+}
+
+document.getElementById('addPlayerBtn').onclick = addPlayer;
+document.getElementById('newName').addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
+document.getElementById('validateRound').onclick = validateRound;
+document.getElementById('resetBtn').onclick = ()=>{
+  if(confirm('Réinitialiser toute la partie (joueurs et manches) ?')){
+    state = { players: [], rounds: [] };
+    calcState = {};
+    saveState(); render();
+  }
+};
+document.getElementById('rulesToggle').onclick = ()=>{
+  document.getElementById('rulesList').classList.toggle('open');
+};
+
+renderRules();
+loadState();
+</script>
+</body>
+</html>

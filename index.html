@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feuilles de score — Jeux de cartes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.44.0/iconfont/tabler-icons.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow" id="eyebrowText">Feuille de marque</p>
+    <h1 id="mainTitle">Nos <span>jeux</span></h1>
+    <p class="sub" id="subTitle">Choisis un jeu pour ouvrir sa feuille de score.</p>
+  </header>
+
+  <!-- MENU -->
+  <div class="gameView active" id="view-menu">
+    <div class="searchWrap">
+      <i class="ti ti-search"></i>
+      <input type="text" id="gameSearch" placeholder="Rechercher un jeu (ex. tarot, uno, dames...)">
+    </div>
+    <div class="menuGrid" id="menuGrid">
+      <button class="gameCard" data-game="phase10" data-search="phase 10 phase10">
+        <div class="icon"><i class="ti ti-cards"></i></div>
+        <div class="info">
+          <h3>Phase 10</h3>
+          <p>Progression des phases, score et calculatrice de main</p>
+        </div>
+        <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      </button>
+      <button class="gameCard" data-game="uno" data-search="uno">
+        <div class="icon"><i class="ti ti-cards"></i></div>
+        <div class="info">
+          <h3>Uno</h3>
+          <p>Score cumulé, premier à atteindre l'objectif gagne</p>
+        </div>
+        <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      </button>
+      <button class="gameCard" data-game="petanque" data-search="petanque petanque boules">
+        <div class="icon"><i class="ti ti-target-arrow"></i></div>
+        <div class="info">
+          <h3>Pétanque</h3>
+          <p>Score par mène, première équipe à 13 points gagne</p>
+        </div>
+        <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      </button>
+      <button class="gameCard" data-game="skyjo" data-search="skyjo">
+        <div class="icon"><i class="ti ti-grid-dots"></i></div>
+        <div class="info">
+          <h3>Skyjo</h3>
+          <p>Le score le plus bas gagne, attention à la règle du double</p>
+        </div>
+        <div class="arrow"><i class="ti ti-chevron-right"></i></div>
+      </button>
+      <div id="genericMenuCards" style="display:contents;"></div>
+    </div>
+    <p class="noResults" id="noResults" style="display:none;">Aucun jeu ne correspond à ta recherche.</p>
+  </div>
+
+  <!-- PHASE 10 -->
+  <div class="gameView" id="view-phase10">
+    <button class="backBtn" data-back="1"><i class="ti ti-arrow-left"></i> Choisir un autre jeu</button>
+    <div id="p10-winnerZone"></div>
+
+    <div class="card">
+      <h2><span class="num">1</span> Joueurs</h2>
+      <div class="setupRow" id="p10-setupRow"></div>
+      <div style="display:flex;gap:.6rem;">
+        <input class="pinput" id="p10-newName" placeholder="Prénom du joueur" maxlength="16" style="flex:2;">
+        <button class="btn-gold" id="p10-addPlayerBtn">Ajouter</button>
+      </div>
+    </div>
+
+    <div class="card" id="p10-ladderCard" style="display:none;">
+      <h2><span class="num">2</span> Progression des phases</h2>
+      <div id="p10-ladderZone"></div>
+      <button class="rulesToggle" id="p10-rulesToggle">voir les 10 phases</button>
+      <div class="rulesList" id="p10-rulesList"></div>
+    </div>
+
+    <div class="card" id="p10-roundCard" style="display:none;">
+      <h2><span class="num">3</span> Nouvelle manche</h2>
+      <div class="roundGrid" id="p10-roundGrid"></div>
+      <div style="margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end;">
+        <button class="btn-gold" id="p10-validateRound">Valider la manche</button>
+      </div>
+    </div>
+
+    <div class="card" id="p10-historyCard" style="display:none;">
+      <h2><span class="num">4</span> Historique</h2>
+      <div style="overflow-x:auto;"><table id="p10-historyTable"></table></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">?</span> Rappel des règles</h2>
+      <div class="rulesSummary">
+        <div class="ruleBlock"><h3>But du jeu</h3><p>Être le premier à valider les 10 phases dans l'ordre. Si plusieurs joueurs finissent la phase 10 la même manche, celui avec le moins de points gagne.</p></div>
+        <div class="ruleBlock"><h3>Déroulement d'un tour</h3><p>À son tour, un joueur pioche une carte (pioche ou défausse), peut poser sa phase si sa main le permet, puis défausse une carte pour terminer son tour.</p></div>
+        <div class="ruleBlock"><h3>Une fois la phase posée</h3><p>Le joueur peut ajouter des cartes sur les combinaisons déjà posées (les siennes ou celles des autres), tant qu'elles restent valides.</p></div>
+        <div class="ruleBlock"><h3>Fin de manche</h3><p>Dès qu'un joueur n'a plus de carte en main, la manche s'arrête. Les autres marquent les points des cartes qui leur restent en main.</p></div>
+        <div class="ruleBlock"><h3>Valeur des cartes restantes</h3>
+          <div class="valueGrid">
+            <span>Cartes 1 à 9</span><span>valeur indiquée</span>
+            <span>Cartes 10, 11, 12</span><span>10 pts chacune</span>
+            <span>Skip</span><span>15 pts</span>
+            <span>Wild</span><span>25 pts</span>
+          </div>
+        </div>
+        <div class="ruleBlock"><h3>Carte Skip</h3><p>Se joue sur un adversaire de son choix, qui passe alors son prochain tour. Ne peut pas être posée dans une combinaison.</p></div>
+        <div class="ruleBlock"><h3>Carte Wild</h3><p>Remplace n'importe quelle carte dans une combinaison (n'importe quel numéro ou couleur).</p></div>
+        <div class="ruleBlock"><h3>Phase non validée</h3><p>Si un joueur n'a pas réussi sa phase à la fin de la manche, il la retente la manche suivante — il ne recule jamais.</p></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn-red" id="p10-resetBtn">Réinitialiser cette partie</button>
+    </div>
+  </div>
+
+  <!-- UNO -->
+  <div class="gameView" id="view-uno">
+    <button class="backBtn" data-back="1"><i class="ti ti-arrow-left"></i> Choisir un autre jeu</button>
+    <div id="uno-winnerZone"></div>
+
+    <div class="card">
+      <h2><span class="num">1</span> Joueurs</h2>
+      <div class="setupRow" id="uno-setupRow"></div>
+      <div style="display:flex;gap:.6rem;margin-bottom:1rem;">
+        <input class="pinput" id="uno-newName" placeholder="Prénom du joueur" maxlength="16" style="flex:2;">
+        <button class="btn-gold" id="uno-addPlayerBtn">Ajouter</button>
+      </div>
+      <div class="targetRow">
+        <span>Objectif de points :</span>
+        <input class="pinput" type="number" id="uno-target" style="width:80px;flex:none;">
+      </div>
+    </div>
+
+    <div class="card" id="uno-ladderCard" style="display:none;">
+      <h2><span class="num">2</span> Scores</h2>
+      <div id="uno-ladderZone"></div>
+    </div>
+
+    <div class="card" id="uno-roundCard" style="display:none;">
+      <h2><span class="num">3</span> Nouvelle manche</h2>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-.4rem 0 .9rem;">Choisis qui a gagné la manche, puis indique les cartes restant en main des autres joueurs. Le vainqueur remporte la somme de ces points.</p>
+      <div style="margin-bottom:.8rem;">
+        <select class="pinput" id="uno-winnerSelect" style="width:100%;"></select>
+      </div>
+      <div class="roundGrid" id="uno-roundGrid"></div>
+      <div style="margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end;">
+        <button class="btn-gold" id="uno-validateRound">Valider la manche</button>
+      </div>
+    </div>
+
+    <div class="card" id="uno-historyCard" style="display:none;">
+      <h2><span class="num">4</span> Historique</h2>
+      <div style="overflow-x:auto;"><table id="uno-historyTable"></table></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">?</span> Rappel des règles</h2>
+      <div class="rulesSummary">
+        <div class="ruleBlock"><h3>But du jeu</h3><p>Être le premier à se débarrasser de toutes ses cartes à chaque manche, et cumuler assez de points pour atteindre l'objectif fixé avant les autres.</p></div>
+        <div class="ruleBlock"><h3>Fin de manche</h3><p>Dès qu'un joueur pose sa dernière carte, la manche s'arrête. Il gagne les points correspondant aux cartes restant dans la main de tous les autres joueurs.</p></div>
+        <div class="ruleBlock"><h3>Valeur des cartes restantes</h3>
+          <div class="valueGrid">
+            <span>Cartes 0 à 9</span><span>valeur indiquée</span>
+            <span>Passe-tour / Inverse / +2</span><span>20 pts</span>
+            <span>Joker / +4</span><span>50 pts</span>
+          </div>
+        </div>
+        <div class="ruleBlock"><h3>Carte "Uno"</h3><p>Un joueur qui pose son avant-dernière carte doit annoncer "Uno" — sinon il peut être pénalisé (à vous de décider si vous jouez cette règle).</p></div>
+        <div class="ruleBlock"><h3>Victoire finale</h3><p>Le premier joueur à atteindre l'objectif de points (500 par défaut) remporte la partie.</p></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn-red" id="uno-resetBtn">Réinitialiser cette partie</button>
+    </div>
+  </div>
+
+  <!-- PETANQUE -->
+  <div class="gameView" id="view-petanque">
+    <button class="backBtn" data-back="1"><i class="ti ti-arrow-left"></i> Choisir un autre jeu</button>
+    <div id="pet-winnerZone"></div>
+
+    <div class="card">
+      <h2><span class="num">1</span> Équipes</h2>
+      <div class="setupRow" id="pet-setupRow"></div>
+      <div style="display:flex;gap:.6rem;">
+        <input class="pinput" id="pet-newName" placeholder="Nom de l'équipe" maxlength="16" style="flex:2;">
+        <button class="btn-gold" id="pet-addPlayerBtn">Ajouter</button>
+      </div>
+    </div>
+
+    <div class="card" id="pet-ladderCard" style="display:none;">
+      <h2><span class="num">2</span> Score (course à 13)</h2>
+      <div id="pet-ladderZone"></div>
+    </div>
+
+    <div class="card" id="pet-roundCard" style="display:none;">
+      <h2><span class="num">3</span> Nouvelle mène</h2>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-.4rem 0 .9rem;">Choisis l'équipe qui a gagné la mène et le nombre de points marqués (nombre de boules plus proches que la meilleure boule adverse).</p>
+      <div class="roundGrid" id="pet-roundGrid"></div>
+      <div style="margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end;">
+        <button class="btn-gold" id="pet-validateRound">Valider la mène</button>
+      </div>
+    </div>
+
+    <div class="card" id="pet-historyCard" style="display:none;">
+      <h2><span class="num">4</span> Historique</h2>
+      <div style="overflow-x:auto;"><table id="pet-historyTable"></table></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">?</span> Rappel des règles</h2>
+      <div class="rulesSummary">
+        <div class="ruleBlock"><h3>But du jeu</h3><p>Être la première équipe à atteindre 13 points.</p></div>
+        <div class="ruleBlock"><h3>Déroulement d'une mène</h3><p>Chaque équipe lance ses boules à tour de rôle en essayant de se rapprocher le plus possible du cochonnet.</p></div>
+        <div class="ruleBlock"><h3>Marquer les points</h3><p>À la fin de la mène, l'équipe dont la boule est la plus proche du cochonnet marque autant de points qu'elle a de boules plus proches que la meilleure boule adverse.</p></div>
+        <div class="ruleBlock"><h3>Mène suivante</h3><p>L'équipe qui a marqué relance le cochonnet pour la mène suivante, depuis l'endroit où elle a ramassé le cochonnet.</p></div>
+        <div class="ruleBlock"><h3>Fin de partie</h3><p>Dès qu'une équipe atteint ou dépasse 13 points, la partie s'arrête immédiatement — même en plein milieu d'une mène.</p></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn-red" id="pet-resetBtn">Réinitialiser cette partie</button>
+    </div>
+  </div>
+
+  <!-- SKYJO -->
+  <div class="gameView" id="view-skyjo">
+    <button class="backBtn" data-back="1"><i class="ti ti-arrow-left"></i> Choisir un autre jeu</button>
+    <div id="sky-winnerZone"></div>
+
+    <div class="card">
+      <h2><span class="num">1</span> Joueurs</h2>
+      <div class="setupRow" id="sky-setupRow"></div>
+      <div style="display:flex;gap:.6rem;">
+        <input class="pinput" id="sky-newName" placeholder="Prénom du joueur" maxlength="16" style="flex:2;">
+        <button class="btn-gold" id="sky-addPlayerBtn">Ajouter</button>
+      </div>
+    </div>
+
+    <div class="card" id="sky-ladderCard" style="display:none;">
+      <h2><span class="num">2</span> Score <span style="font-size:11px;color:var(--cream-dim);font-weight:400;">(le plus bas gagne, fin à 100)</span></h2>
+      <div id="sky-ladderZone"></div>
+    </div>
+
+    <div class="card" id="sky-roundCard" style="display:none;">
+      <h2><span class="num">3</span> Nouvelle manche</h2>
+      <p style="font-size:12.5px;color:var(--cream-dim);margin:-.4rem 0 .9rem;">Indique qui a retourné toutes ses cartes en premier, puis le total de chaque joueur. Si ce joueur n'a pas le score le plus bas de la manche, son score est automatiquement doublé.</p>
+      <div style="margin-bottom:.8rem;">
+        <select class="pinput" id="sky-enderSelect" style="width:100%;"></select>
+      </div>
+      <div class="roundGrid" id="sky-roundGrid"></div>
+      <div style="margin-top:1rem;display:flex;gap:.6rem;justify-content:flex-end;">
+        <button class="btn-gold" id="sky-validateRound">Valider la manche</button>
+      </div>
+    </div>
+
+    <div class="card" id="sky-historyCard" style="display:none;">
+      <h2><span class="num">4</span> Historique</h2>
+      <div style="overflow-x:auto;"><table id="sky-historyTable"></table></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">?</span> Rappel des règles</h2>
+      <div class="rulesSummary">
+        <div class="ruleBlock"><h3>But du jeu</h3><p>Avoir le score cumulé le plus bas possible. La partie s'arrête dès qu'un joueur atteint 100 points ; celui qui a le moins de points gagne.</p></div>
+        <div class="ruleBlock"><h3>Plateau de départ</h3><p>Chaque joueur a 12 cartes face cachée (3 lignes de 4) et en retourne 2 au début de la partie.</p></div>
+        <div class="ruleBlock"><h3>Colonnes complètes</h3><p>Si les 3 cartes d'une colonne sont retournées et identiques, la colonne est défaussée et ne compte plus dans le score.</p></div>
+        <div class="ruleBlock"><h3>Fin de manche</h3><p>Dès qu'un joueur a retourné toutes ses cartes, chacun des autres joueurs joue un dernier tour, puis tout le monde révèle son plateau.</p></div>
+        <div class="ruleBlock"><h3>Règle du double</h3><p>Si le joueur qui a terminé la manche en premier n'a pas le score le plus bas (égalité comprise), son score de la manche est doublé.</p></div>
+        <div class="ruleBlock"><h3>Valeur des cartes</h3><p>Les cartes vont de -2 à 12. Les cartes négatives et le 0 sont les meilleures, plus le chiffre est élevé plus il pénalise.</p></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn-red" id="sky-resetBtn">Réinitialiser cette partie</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
